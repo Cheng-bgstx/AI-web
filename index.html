@@ -11,11 +11,11 @@
         :root {
             --bg-color: #050505;
             --left-base: rgba(5, 25, 45, 0.95);
-            --right-base: rgba(20, 10, 60, 0.95);
+            --right-base: rgba(5, 25, 45, 0.95);
             --center-base: rgba(10, 10, 10, 0.9);
             
             --neon-blue: #00f3ff;
-            --neon-purple: #bc13fe;
+            --neon-purple: #7b2cbf;
             --neon-gold: #ffd700;
             
             --side-width: 35%;
@@ -56,9 +56,7 @@
             text-align: center; 
             z-index: 100; 
             pointer-events: none;
-            transition: opacity 0.5s, visibility 0.5s;
-            opacity: 1;
-            visibility: visible;
+            transition: opacity 0.5s;
         }
         .main-header-fixed h1 {
             font-size: 1.5rem; 
@@ -67,6 +65,7 @@
             color: rgba(255,255,255,0.3);
             font-family: 'Orbitron', sans-serif;
         }
+        .container:hover .main-header-fixed { opacity: 0; }
         /* 当悬停左右栏时隐藏标题 */
         .container:has(.pane.left:hover) .main-header-fixed,
         .container:has(.pane.right:hover) .main-header-fixed { 
@@ -93,16 +92,6 @@
             overflow-x: hidden; 
             overflow-y: auto; 
         }
-        
-        .pane:hover .pane-header-area {
-            height: 100px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.95), transparent);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: space-between; 
-            align-items: center;
-            padding: 0 50px;
-        }
 
         .pane:hover .scroll-hint { display: none; }
         .pane:hover .header-sub-tag { 
@@ -111,9 +100,41 @@
             position: relative; 
             display: block;
         }
+        .header-main-group {
+            display: flex;
+            flex-direction: column; /* 默认未展开时：上下排列 */
+            align-items: center;
+            transition: all 0.5s;
+        }
+        .pane:hover .header-main-group {
+            flex-direction: row; 
+            gap: 15px;          /* 图标和文字的间距 */
+            align-items: center;
+        }
+        /* 调整展开后的大小，使其协调 */
+        .pane:hover .header-main-group i {
+            font-size: 2.2rem; 
+            margin: 0;
+        }
+        .pane:hover .header-main-group h2 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
 
-        .pane.left:hover .pane-header-area { flex-direction: row; }
-        .pane.right:hover .pane-header-area { flex-direction: row-reverse; }
+        /* 3. 核心布局：控制标题组在顶部的【左右位置】 */
+        .pane:hover .pane-header-area {
+            padding: 0 50px; /* 给左右留点边距，不要贴着屏幕边缘 */
+        }
+
+        /* 【关键】左栏展开 -> 标题组靠左 */
+        .pane.left:hover .pane-header-area {
+            justify-content: flex-start; /* 靠左对齐 */
+        }
+
+        /* 【关键】右栏展开 -> 标题组靠右 */
+        .pane.right:hover .pane-header-area {
+            justify-content: flex-end;   /* 靠右对齐 */
+        }
         
         .pane::-webkit-scrollbar { width: 6px; }
         .pane::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
@@ -203,15 +224,9 @@
 
         /* AI课程中心标签 */
         .header-sub-tag {
-            position: absolute;
-            right: 50px;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.6s ease;
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.6);
+            font-family: 'Noto Sans SC', sans-serif;
             letter-spacing: 2px;
-            font-family: 'Orbitron', sans-serif;
+            font-weight: 500;
         }
 
         /* 内容流容器 */
@@ -351,8 +366,6 @@
 
         /* 课程讲次卡片 */
         .lecture-card {
-            display: flex;
-            gap: 15px;
             padding: 15px;
             margin-bottom: 15px;
             background: rgba(255,255,255,0.03);
@@ -366,36 +379,6 @@
             border-color: var(--neon-blue);
             transform: translateX(5px);
         }
-
-        .lecture-thumb {
-            width: 80px;
-            height: 100px;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        .lecture-thumb i {
-            font-size: 2rem;
-            color: rgba(255,255,255,0.3);
-        }
-        .lecture-thumb::after {
-            content: 'PDF';
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            font-size: 0.65rem;
-            color: var(--neon-blue);
-            background: rgba(0,0,0,0.8);
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-
         .lecture-info {
             flex: 1;
             display: flex;
@@ -730,6 +713,13 @@
     background-position: center;
     background-repeat: no-repeat;
 }
+        .video-thumb-mini img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
         .video-thumb-mini::after {
             content: '';
             position: absolute;
@@ -798,7 +788,11 @@
 
         /* ============ 右侧折叠章节 ============ */
         .chapter-accordion {
-            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            column-gap: 20px;
+            /* 保留其他原有样式 */
         }
         .chapter-item {
             margin-bottom: 15px;
@@ -952,24 +946,70 @@
         .name-row {
             margin-bottom: 15px;
         }
-        .name-label {
-            display: block;
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.5);
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-            font-family: 'Orbitron', sans-serif;
+        .name-label, .research-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            
+            /* 统一间距 */
+            margin-top: 10px;
+            margin-bottom: 15px;
+            padding: 12px 0; /* 高度加高，更有分量 */
+            
+            /* 统一字体 */
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 1.2rem; /* 字号加大 */
+            font-weight: 700;
+            letter-spacing: 3px;
+            
+            /* 【核心修改】全部改成金色，去掉那个丑蓝色 */
+            color: var(--neon-gold); 
+            
+            /* 统一的边框装饰：上下两条细金线 */
+            background: transparent;
+            border-top: 1px solid rgba(255, 215, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            
+            /* 统一发光效果 */
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
         }
+
+        /* 名字样式 (保持黄色高亮) */
         .name-content {
-            font-size: 1.8rem;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 2.2rem; /* 名字极大 */
             font-weight: 700;
             color: var(--neon-gold);
-            font-family: 'Orbitron', sans-serif;
-        }
-        .title-row {
-            font-size: 0.95rem;
-            color: rgba(255,255,255,0.7);
             margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        /* 头衔样式 (保持两行排版) */
+        .title-row {
+            display: flex;
+            flex-direction: column; /* 让两段话上下排列 */
+            gap: 12px;              /* 两段话之间的距离 */
+            
+            font-size: 1rem;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* 针对 title-row 里面的每一行文字进行设置 */
+        .title-row p {
+            margin: 0;
+            display: flex;          /* 【关键】启用弹性布局 */
+            align-items: center;    /* 【关键】让图标和文字垂直居中对齐 */
+            justify-content: center;/* 水平居中 */
+            gap: 8px;               /* 图标和文字之间的间距 */
+        }
+
+        /* 这里的图标颜色可以微调，比如设为淡金色 */
+        .title-row i {
+            color: var(--neon-gold);
+            opacity: 0.8;
         }
         .research-row {
             margin-top: 20px;
@@ -989,12 +1029,30 @@
             flex-wrap: wrap;
         }
         .r-tag {
-            padding: 6px 14px;
+            display: inline-block;       /* 确保能撑开宽高 */
+            padding: 8px 20px;           /* 增加内边距，让标签更饱满 */
+            margin: 5px;                 /* 增加标签之间的间距 */
+            
             background: rgba(255, 215, 0, 0.1);
             border: 1px solid var(--neon-gold);
-            border-radius: 15px;
-            font-size: 0.75rem;
+            border-radius: 20px;         /* 圆角加大 */
+            
+            /* 【核心修改】字号加大 */
+            font-size: 1.1rem;           /* 原来是 0.75rem，现在加大到 1.1rem */
+            font-weight: 600;            /* 字体加粗 */
+            letter-spacing: 1px;         /* 增加字间距 */
             color: var(--neon-gold);
+            
+            /* 增加一点微弱的发光，更有质感 */
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        /* 鼠标悬停时的特效 */
+        .r-tag:hover {
+            background: rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            transform: translateY(-2px);
         }
 
         .visitor-panel {
@@ -1057,6 +1115,9 @@
             .scroll-screen {
                 height: 400px;
             }
+            .chapter-accordion {
+                grid-template-columns: 1fr;  /* 小屏幕恢复单列 */
+            }
         }
     </style>
 </head>
@@ -1064,15 +1125,18 @@
     <canvas id="particle-canvas"></canvas>
     
     <div class="main-header-fixed">
-        <h1>AI Course Hub</h1>
+        <h1>AI课程枢纽</h1>
     </div>
 
     <div class="container">
         <!-- ========== 左侧：通识教育 ========== -->
         <div class="pane left">
             <div class="pane-header-area">
-                <i class="fas fa-graduation-cap" style="color: var(--neon-blue)"></i>
-                <h2 style="color: var(--neon-blue)">通识教育</h2>
+                <div class="header-main-group">
+                    <i class="fas fa-graduation-cap" style="color: var(--neon-blue)"></i>
+                    <h2 style="color: var(--neon-blue)">通识教育</h2>
+                </div>
+                
                 <div class="scroll-hint">General Education</div>
             </div>
 
@@ -1104,135 +1168,121 @@
                             </div>
                             <div class="scroll-screen" id="advanced-scroll">
                                 <!-- 11讲课程 -->
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card">
                                     <div class="lecture-info">
                                         <h5>第1讲 人工智能概述</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/1.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第2讲 知识推理与问题求解</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/2.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第3讲 机器学习基础</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/3.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第4讲 深度学习</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">3学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/4.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第5讲 强化学习</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">3学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/5.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第6讲 智能之眼——视觉感知</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2+2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/6.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+    <i class="fas fa-download"></i> 课件
+</a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第7讲 智能之躯——具身智能</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2+2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/7.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第8讲 AI卫士——智慧医疗</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2+1学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/8.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第9讲 AI助手——智慧生活</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2+2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/9.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第10讲 人工智能前沿</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/g/10.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第11讲 人工智能思辨</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
                                         </div>
                                     </div>
                                 </div>
@@ -1247,87 +1297,77 @@
                             </div>
                             <div class="scroll-screen" id="literacy-scroll">
                                 <!-- 7讲课程 -->
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第1讲 人工智能概述</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/p/1.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第2讲 知识推理与问题求解</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/p/2.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第3讲 机器学习基础</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/p/3.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第4讲 深度学习</h5>
                                         <div class="lecture-meta">
-                                            <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <span class="lecture-hours">3学时</span>
+                                            <a href="./pdf/p/4.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第5讲 人工智能前沿技术</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <a href="./pdf/p/5.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第6讲 人工智能技术应用</h5>
                                         <div class="lecture-meta">
-                                            <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
+                                            <span class="lecture-hours">3学时</span>
+                                            <a href="./pdf/p/6.pdf" class="download-btn" target="_blank" style="text-decoration: none;">
+                                                <i class="fas fa-download"></i> 课件
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="lecture-card" onclick="window.open('#', '_blank')">
-                                    <div class="lecture-thumb">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </div>
+                                <div class="lecture-card" >
                                     <div class="lecture-info">
                                         <h5>第7讲 AI伦理与安全思辨</h5>
                                         <div class="lecture-meta">
                                             <span class="lecture-hours">2学时</span>
-                                            <button class="download-btn"><i class="fas fa-download"></i> 课件</button>
                                         </div>
                                     </div>
                                 </div>
@@ -1397,7 +1437,7 @@
                             <div class="carousel-track" id="video-track">
                                 <!-- 示例视频卡片（实际应该有50个） -->
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV17SzeBsEix/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/fda2f8b1dd69fed56b388ca967b2a6a6449cba79.jpg');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/1.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1408,7 +1448,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1jSzeBsEmo/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/3a69f58e8368175ae9a38b62c1303d6ecc3043dd.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/2.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1419,7 +1459,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1jSzeBsEXX/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/1c23e31ec9bd4e168f983756e508144d17b8cc82.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/3.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1430,7 +1470,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV17SzeBsEuo/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/bec340ee09c790ce579a522a3405938eb378626b.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/4.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1441,7 +1481,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1EmzeBdEJu/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/7b9b5848f569aebc68cc1fda5185e70791021994.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/5.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1452,7 +1492,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1EmzeBdE4d/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/6783a4d1d3371c2077983d93e94b5839d2500119.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/6.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1463,7 +1503,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1EmzeBdEEp/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/bade68ecdefd7e4c916a25759ede6431374e9fab.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/7.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1474,7 +1514,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1RGzeBSEaE/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/f15349d2214319a20e3563ae4c2f6093e9646297.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/8.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1485,7 +1525,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1BmzeBdEVe/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/540da18bc72a6bf91e2e39880117ba56027a1744.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/9.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1496,7 +1536,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV15LzeBUEaW/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/1c25ea5049308360700f44c98f9331c1afb1db0c.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/10.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1507,7 +1547,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1eLzeBmEtu/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/3fe232d8a63ed3446cf345688be9c9a7591d95b9.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/11.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1518,7 +1558,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1eLzeBmEhr/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/783ea4ca0f72a579b95314fc0c65acc37a328dd2.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/12.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1529,7 +1569,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1eLzeBmEFF/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/fa32569238fdae5a58b363bc2fe0cce2280febca.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/13.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1540,7 +1580,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1vGzeBSEXX/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/6a48b9d4fc3ae5714cacb4dbdf59537e0f327fac.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/14.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1551,7 +1591,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1e5zeBEEhC/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/360a2335e000ebf0e1fa8adea3d59a1f82be518e.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/15.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1562,7 +1602,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1e5zeBEExh/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/7846e7fd1c57d212835eba4f901d9e95d1519471.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/16.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1573,7 +1613,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1e5zeBEECw/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/3cce1b4a7daa9e21e9392f673a328b413ccda32b.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/17.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1584,7 +1624,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1RGzeBSEid/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/f2e2b19c4db2bd4eec6076e7f8f8b8ac8dd345c4.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/18.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1595,7 +1635,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1aEzeB1EHj/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/69df92a3f83c573152827fa176bbd449afc41ce8.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/19.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1606,7 +1646,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1BMzeBpEFa/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/0a66f3140f69bf12e30a45242e24b14a79027dd9.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/20.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1617,7 +1657,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV17MzeBWEMD/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/d31a63babbf59bf93d1c10c340776f9113a9f8f7.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/21.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1628,7 +1668,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV148zeBMERt/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/dda96c6d25427fab8c5f822a41af7008a8d012a6.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/22.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1639,7 +1679,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV148zeBME9J/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/23e87ef105723c089fd2b7c44487c75d18716427.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/23.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1650,7 +1690,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1hHzeBCEvY/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/3409a70f9b2ebff616cc769b6f591d8827e43a8b.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/24.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1661,7 +1701,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1DHzeBCEo9/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/4c9888b9d22fbafdb51f49e185c6e6f829d2fab9.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/25.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1672,7 +1712,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1QnzeB5EwJ/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/1fdbe2eb1580fb558480b98b2d1f658c65f370f3.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/26.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1683,7 +1723,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1bszeBrEYP/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/43db3a06ecc54a0815c4bfa5385ee7e5fea5f413.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/27.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1694,7 +1734,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1bszeBrE6U/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/621b8f1756c09e136895f90be5296cf40366c040.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/28.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1705,7 +1745,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1bszeBrExx/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/4cf1c9fff6504b23f1d0452ed46c183135a22bd4.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/29.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1716,7 +1756,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV18szeBkEbD/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/d86e1bfe9952ff9bc701cde16561c3163c47ca01.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/30.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1727,7 +1767,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1SWzeBGEYn/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/f237eb0966261ade5a06116d62599d32580fedb4.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/31.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1738,7 +1778,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1VczqBREUH/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/b367c5b1e67ee953afa6c5b2120bae6880b03631.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/32.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1749,7 +1789,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1DTzqBDEar/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/57ab21878c2aa01c15c0fd7f0bb759f684bf03db.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/33.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1760,7 +1800,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1hTzqBDE8J/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/e135e8804c416e80f7e6e57a133fab75fe4dabfe.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/34.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1771,7 +1811,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV13TzqBDEFt/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/d30da4ada0e1bbb31b903fb9c0463beb962da54b.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/35.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1782,7 +1822,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV13KzqBHErm/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/d1fec1a6625e41f50198a52e8ed5cc3c04c0e537.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/36.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1793,7 +1833,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1hKzqBHEp4/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/2074f1766e7d76ecb03cf6b9b140301ca4cba6de.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/37.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1804,7 +1844,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV13KzqBHEmh/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/8602e64ba737da15ebc56c9e106b62acfe1f133d.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/38.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1815,7 +1855,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1ugzqBUEuf/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/2fc03d2a9854c1afa264590a95ba2ec702179323.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/39.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1826,7 +1866,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1ugzqBUE61/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/f24c8a87a54a6522871bd247c3d6cd06e83f0754.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/40.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1837,7 +1877,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1ugzqBUEBr/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/e6ed0d87e04cb5e9924969a93f1005fe4cc779b6.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/41.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1848,7 +1888,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1MgzqBUEk1/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/f97fe202a6c517108a473075a576bb57e424e0e0.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/42.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1859,7 +1899,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1guzqBJEWB/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/8ce07a11e58aa020d910cddbc668ef9ea49a636d.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/43.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1870,7 +1910,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1uuzqBJEq4/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/37b846f488ce3fcb086fdcec8ae8a870bd6341f7.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/44.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1881,7 +1921,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1uuzqBJEtu/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/130293f3f5f64b69ec1b101eb5cb637078f26b72.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/45.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1892,7 +1932,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1uuzqBJEzh/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/91d54bd3c3d19e22708e00de0fb217dab9cdab76.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/46.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1903,7 +1943,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1VczqBREEv/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/34eb9b0e16af6d5007aba957907e31577b8674d9.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/47.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1914,7 +1954,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1eczqBREpc/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/36ece4124a10f7fed7045663592e22eaa07e07ac.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/48.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1925,7 +1965,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1VFzqBxEoY/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/9115ec598917160cf6122996517cd35d7b358562.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/49.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1936,7 +1976,7 @@
                                     </div>
                                 </div>
                                 <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV15FzqBxEq3/?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                    <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/6af569d18bb3d709b9640e1ec33addfc5d520630.jpg@672w_378h_1c.webp');">
+                                    <div class="video-thumb-mini" style="background-image: url('./image/50.jpg');">
                                         <i class="fas fa-play-circle play-icon"></i>
                                     </div>
                                     <div class="video-info-mini">
@@ -1971,23 +2011,39 @@
                 </div>
                 
                 <div class="info-container">
+    
                     <div class="name-row">
-                        <span class="name-label">Course Director</span>
+                        <div class="name-label">
+                            <i class="fas fa-user-tie" style="margin-right:8px;"></i> 课程主讲人
+                        </div>
+                        
                         <div class="name-content">丛润民</div>
                     </div>
                     
                     <div class="title-row">
-                        <i class="fas fa-university" style="margin-right:8px;"></i>山东大学控制科学与工程学院 教授
+                        <p>
+                            <i class="fas fa-id-badge"></i>
+                            教授、博导、教育部青年长江学者
+                        </p>
+                        
+                        <p>
+                            <i class="fas fa-university"></i>
+                            山东大学控制科学与工程学院
+                        </p>
                     </div>
                     
                     <div class="research-row">
-                        <span class="research-label">RESEARCH AREAS</span>
+                        <div class="name-label">
+                            <i class="fas fa-user-tie" style="margin-right:8px;"></i> 研究方向
+                        </div>
+                        
                         <div class="research-tags">
                             <span class="r-tag">人工智能</span>
                             <span class="r-tag">具身感知</span>
-                            <span class="r-tag">......</span>
+                            <span class="r-tag">........</span>
                         </div>
                     </div>
+                
                 </div>
             
                 <div class="visitor-panel">
@@ -2005,9 +2061,12 @@
         <!-- ========== 右侧：专业教育 ========== -->
         <div class="pane right">
             <div class="pane-header-area">
-                <i class="fas fa-laptop-code" style="color: var(--neon-purple)"></i>
-                <h2 style="color: var(--neon-purple)">专业教育</h2>
-                <div class="scroll-hint">Professional Devlopment</div>
+                <div class="header-main-group">
+                    <i class="fas fa-laptop-code" style="color: var(--neon-purple)"></i>
+                    <h2 style="color: var(--neon-purple)">专业教育</h2>
+                </div>
+                
+                <div class="scroll-hint">Professional Education</div>
             </div>
 
             <div class="content-stream">
@@ -2381,7 +2440,7 @@
                                 <div class="carousel-track" id="video-track">
                                     <!-- 示例视频卡片（实际应该有50个） -->
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1HN4y1g7g4?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/790c9384c3bb302638e2ae099b505b988a15fadd.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/1.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2392,7 +2451,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1cZ4y1Y7eu?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/c3b00d7b68a9731470b57c32383347f843abfcf9.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/2.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2403,7 +2462,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1FY4y177Lg?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/3985c4fe58f8930a096c60d0e3062faa83790943.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/3.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2414,7 +2473,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1nU4y1B7J3?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/c1ccb6684ff49481334bd30dc18bb81c1da7e062.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/4.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2425,7 +2484,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1YV4y1J7dz?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/cb1436840cc1f88bec6fc34f10c97d22a9628416.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/5.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2436,7 +2495,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1vF411P7PY?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/775863e6bdc1587279a64d6c8d767190f0a7a40f.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/s1.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2447,7 +2506,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1Dt4y1G7ib?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/166a2194abde6ff24ba0f1536bf1af09baf00074.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/s2.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2458,7 +2517,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1ja411S7jy?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/5c8cb91fec0df4c1f820185914ec61ae54d4ad23.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/6.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2469,7 +2528,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV16t4y1V71n?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/b947108960314268ed98763ac0e8e7175ad714a9.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/7.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2480,7 +2539,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV14S4y147U6?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/31be3c73db090d31640039511f45ea7165631fb8.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/8.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2491,7 +2550,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1sa411o7AV?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/bca40b499b8340b92213d88a8dc3d1ae500e3f66.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/8.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2502,7 +2561,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1DW4y1a7Jb?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/9e5258e6994015de320ec6398829ecc868623bd2.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/9.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2513,7 +2572,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1Ag411C7mG?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/699b582dce276af2a459452cb025bb599dab2719.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/10.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2524,7 +2583,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1T14y1t7x4?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/0813d601fb76a25e088a8fe4cbe13f0262d32ae7.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/s4.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2536,7 +2595,7 @@
                                     </div>
                     
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1jB4y157jd?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/44b102bead9f2ce23997ac6bb936d2505025aa7a.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/11.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
@@ -2547,7 +2606,7 @@
                                         </div>
                                     </div>
                                     <div class="video-card-mini" onclick="window.open('https://www.bilibili.com/video/BV1JU4y1k7js?spm_id_from=333.1387.collection.video_card.click', '_blank')">
-                                        <div class="video-thumb-mini" style="background-image: url('https://i0.hdslb.com/bfs/archive/1ba222e42414f8523c30e5393ebad03330ac885f.jpg@672w_378h_1c.webp');">
+                                        <div class="video-thumb-mini" style="background-image: url('./image/pd/12.jpg');">
                                             <i class="fas fa-play-circle play-icon"></i>
                                         </div>
                                         <div class="video-info-mini">
